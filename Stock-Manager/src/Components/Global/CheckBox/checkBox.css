@@ -1,0 +1,13 @@
+.svg-container {
+    cursor: pointer;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 0.5s ease-in-out;
+  }
+  
+  .animate .svg-container {
+    stroke-dashoffset: 0;
+  }
+  
+  
+  

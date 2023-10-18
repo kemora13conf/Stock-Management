@@ -1,0 +1,58 @@
+body{
+    @apply bg-light-secondary-100 dark:bg-dark-primary-600 scroll-smooth ;
+}
+
+.label{
+    @apply text-sm font-semibold text-light-quarternary-500 dark:text-dark-primary-200 pl-1
+}
+.input{
+    @apply w-full px-3 py-2 flex
+            text-sm text-light-quarternary-500 dark:text-dark-primary-300 
+            shadow-light dark:shadow-dark
+            border border-light-quarternary-200 dark:border-dark-primary-400  rounded-md
+            bg-transparent
+            focus:border-transparent dark:focus:border-transparent
+            focus:shadow-none
+            focus:bg-light-secondary-200 dark:focus:bg-dark-primary-500 
+            transition-all duration-300 outline-none 
+}
+
+.error{
+    @apply text-xs text-error
+}
+.upload-btn{
+    @apply px-4 py-2 flex items-center justify-center
+            text-sm text-light-quarternary-500 dark:text-dark-primary-300 
+            shadow-light dark:shadow-dark
+            border border-light-quarternary-200 dark:border-dark-primary-400  rounded-md
+            bg-transparent cursor-pointer
+            hover:border-transparent dark:hover:border-transparent
+            hover:shadow-none
+            hover:bg-light-secondary-200 dark:hover:bg-dark-primary-800 
+            transition-all duration-300 outline-none 
+}
+
+.images-preview{
+    @apply w-full h-[120px] p-4 
+            flex justify-start items-start gap-3 overflow-hidden overflow-x-auto
+            bg-light-secondary-200 dark:bg-dark-primary-500
+            rounded-md shadow-light dark:shadow-dark
+}
+.image-preview{
+    @apply w-[150px] h-[150px]
+            flex justify-start items-start gap-3 overflow-hidden overflow-x-auto
+            bg-light-secondary-200 dark:bg-dark-primary-500
+            rounded-full shadow-light dark:shadow-dark
+}
+.submit-btn{
+    @apply px-4 py-2 flex items-center justify-center
+            text-sm text-light-quarternary-500 dark:text-dark-primary-300 
+            shadow-light dark:shadow-dark
+            border border-light-quarternary-200 dark:border-dark-primary-400  rounded-md
+            bg-transparent cursor-pointer
+            hover:border-transparent dark:hover:border-transparent
+            hover:shadow-none
+            hover:bg-light-quarternary-500 dark:hover:bg-dark-primary-800 
+            hover:text-light-secondary-100 dark:hover:text-dark-primary-300
+            transition-all duration-300 outline-none 
+}

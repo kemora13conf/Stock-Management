@@ -1,0 +1,12 @@
+::-webkit-scrollbar {
+  @apply w-[10px] h-[10px];
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-light-primary-500 dark:bg-dark-primary-800
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+  @apply bg-light-secondary-500 border-light-primary-500 rounded-full transition-all duration-300 hover:border-none dark:bg-dark-primary-400 dark:border-dark-primary-800 ;
+}

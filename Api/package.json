@@ -1,0 +1,33 @@
+{
+  "name": "store_api",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "This is an api that is suitable for any e-commerce project",
+  "main": "Runner.js",
+  "scripts": {
+    "start": "node Runner.js",
+    "dev": "nodemon Runner.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdo487/Store_api.git"
+  },
+  "author": "Abdelghani El Mouak",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/abdo487/Store_api/issues"
+  },
+  "homepage": "https://github.com/abdo487/Store_api#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.1",
+    "mongoose": "^7.4.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.0.1",
+    "uuid": "^9.0.0"
+  }
+}
