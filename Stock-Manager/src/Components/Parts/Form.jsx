@@ -10,7 +10,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
     // get the id param from the url
     const { setLoaded, reqFinished, theme , setConfirm} = useContext(AppContext);
 
-    const [ category, setCategory ] = useState({});
+    const [ item, setItem ] = useState({});
     const [ loading, setLoading ] = useState(false);
     const [ form, setForm ] = useState({
         name: "",
@@ -124,12 +124,13 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                                 [res.type]: res.message
                             }
                         })
+                        setItem(res.data)
                         setLoading(false);
                         return;
                     }
                 }
                 toast.success(res.message, { theme: theme });
-                setCategory(res.data)
+                setItem(res.data)
                 setLoading(false);
                 setReload(prv => !prv);
 
@@ -175,7 +176,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                 toast.success(res.message, { theme: theme });
                 setLoading(false);
                 setReload(prv => !prv);
-                setIsFormOpen(false);
+                // setIsFormOpen(false);
             })
             .catch(err => {
                 toast.error(err.message, { theme: theme });
@@ -184,11 +185,11 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
         }
     }
 
-    // fetch the category data
+    // fetch the item data
     useEffect(() => {
         setLoaded(true);
         if(id) {
-            Fetch(import.meta.env.VITE_API+'/categories/'+id, 'GET')
+            Fetch(import.meta.env.VITE_API+'/car-parts/'+id, 'GET')
             .then(res => {
                 if(res.type === "error") {
                     toast.error(res.message, { theme: theme });
@@ -196,26 +197,28 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                     setOpenedId(undefined);
                     setLoading(false);
                 }
-                setCategory(res.data);
+                setItem(res.data);
             })
         }
     }
     ,[reqFinished]);
     // set the form data
     useEffect(() => {
-        if(id && category) {
+        if(id && item) {
             setForm(prv => {
                 return {
                     ...prv,
-                    name: category.name,
-                    title: category.title,
-                    description: category.description,
-                    gallery: category.gallery,
+                    name: item.name,
+                    description: item.description,
+                    manufacturer: item.manufacturer,
+                    price: item.price,
+                    stock_quantity: item.stock_quantity,
+                    gallery: item.gallery,
                     remove: []
                 }
             })
             setOldImagesPreview(prv => []);
-            category.gallery?.map(image => {
+            item.gallery?.map(image => {
                 setOldImagesPreview(prv => {
                     return [
                         ...prv,
@@ -225,20 +228,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
             })
         }
     }
-    ,[category]);
-    // set the errors
-    useEffect(() => {
-        setErrors(prv => {
-            return {
-                ...prv,
-                name: "",
-                title: "",
-                description: "",
-                file: ""
-
-            }
-        })
-    },[form]);
+    ,[item]);
     
     return (
         <motion.div 
@@ -388,7 +378,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                                 type="number"
                                 name="stock_quantity"
                                 id="stock_quantity"
-                                min={1}
+                                min={0}
                                 value={form.stock_quantity}
                                 onChange={handleInput}
                                 className={`input ${errors.stock_quantity ? '!border-error' : ''}`}
@@ -458,7 +448,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                                         <label
                                             className="label">Old Images Preview</label>
                                         <div 
-                                            className="images-preview"
+                                            className="old-images-preview"
                                         >
                                             {
                                                 oldImagesPreview?.map((img, index) => {
@@ -466,7 +456,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                                                         <div 
                                                             key={index} 
                                                             className="
-                                                                w-full relative h-full max-w-[150px]
+                                                                w-full relative h-auto max-h-full aspect-[1/.7] max-w-[150px]
                                                             ">
                                                             <div
                                                                 onClick={() => {removeImage(img._id)}}
@@ -481,7 +471,7 @@ function Form({ id, setReload, setIsFormOpen, setOpenedId }) {
                                                                 src={import.meta.env.VITE_ASSETS + '/Images/' + img.name} 
                                                                 key={index} 
                                                                 className="
-                                                                    w-[150px] h-full rounded-md object-cover
+                                                                    min-w-[150px] h-full rounded-md object-cover shadow-light dark:shadow-dark
                                                                 "
                                                             />
                                                         </div>

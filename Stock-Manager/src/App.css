@@ -38,6 +38,11 @@ body{
             bg-light-secondary-200 dark:bg-dark-primary-500
             rounded-md shadow-light dark:shadow-dark
 }
+.old-images-preview{
+    @apply w-full max-h-[300px] 
+            flex justify-start items-start gap-3 overflow-hidden overflow-x-auto
+            pb-2
+}
 .image-preview{
     @apply w-[150px] h-[150px]
             flex justify-start items-start gap-3 overflow-hidden overflow-x-auto

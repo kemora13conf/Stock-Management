@@ -6,14 +6,13 @@ import CarPart from "../../Models/CarPart.js";
 
 const itemById = async (req, res, next, id) => {
   try {
-    const category = await CarPart.findOne({ _id: id })
+    const item = await CarPart.findOne({ _id: id })
       .populate("gallery")
-      .populate("user");
-    if (!category)
+    if (!item)
       return res
         .status(404)
         .json(response("error", "CarPart not found."));
-    req.category = category;
+    req.item = item;
     next();
   } catch (error) {
     res
@@ -41,8 +40,8 @@ const list = async (req, res) => {
         carParts = await CarPart.find({
           $or: [
             { name: { $regex: search, $options: "i" } },
-            { title: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
+            { manufacturer: { $regex: search, $options: "i" } },
           ],
         })
           .populate('gallery')
@@ -85,6 +84,43 @@ const list = async (req, res) => {
   }
 };
 
+const outOfStock = async (req, res) => {
+  try {
+    const carParts = await CarPart.find({ stock_quantity: 0 })
+      .populate('gallery')
+    res.status(200).json(
+      response("success", "Data fetched successfully", carParts)
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        response(
+          "error",
+          "Something went wrong while fetching data. " + error.message
+        )
+      );
+  }
+};
+const stockLessThan20 = async (req, res) => {
+  try {
+    const carParts = await CarPart.find({ stock_quantity: { $lt: 20 } })
+      .populate('gallery')
+    res.status(200).json(
+      response("success", "Data fetched successfully", carParts)
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        response(
+          "error",
+          "Something went wrong while fetching data. " + error.message
+        )
+      );
+  }
+};
+
 const item = (req, res) => {
   return res
     .status(200)
@@ -92,7 +128,7 @@ const item = (req, res) => {
       response(
         "success",
         "CarPart fetched successfully",
-        req.category
+        req.item
       )
     );
 };
@@ -165,7 +201,7 @@ const create = async (req, res) => {
     });
     let IMAGES = await Image.insertMany(imagesArr);
     IMAGES = IMAGES.map((image) => image._id);
-    const category = await CarPart.create({
+    const item = await CarPart.create({
       name,
       description,
       manufacturer,
@@ -179,7 +215,7 @@ const create = async (req, res) => {
         response(
           "success",
           "CarPart created successfully",
-          category
+          item
         )
       );
   } catch (error) {
@@ -188,7 +224,7 @@ const create = async (req, res) => {
       .json(
         response(
           "error",
-          "Something went wrong while creating the category. " + error.message
+          "Something went wrong while creating the item. " + error.message
         )
       );
   }
@@ -196,28 +232,36 @@ const create = async (req, res) => {
 
 
 const verifyUpdateInputs = (req, res, next) => {
-  const { name, title, description } = req.body;
-  if (!name) return res.status(400).json(response("name", "Name field is required."));
-  if (!title) return res.status(400).json(response("title", "Title field is required."));
-  if (!description) return res.status(400).json(response("description", "Description field is required."));
-  if (name.length < 3) return res.status(400).json(response("name", "Name field length is too short."));
-  if (title.length < 3) return res.status(400).json(response("title", "Title field length is too short."));
-  if (description.length < 3) return res.status(400).json(response("description", "Description field length is too short."));
+  const { name, description, manufacturer, price, stock_quantity } = req.body;
+  if (!name) 
+    return res.status(400).json(response("name", "Name is required", item));
+  if (!description)
+    return res.status(400).json(response("description", "Description is required", item));
+  if(!manufacturer)
+    return res.status(400).json(response("manufacturer", "Manufacturer is required", item));
+  if(!price)
+    return res.status(400).json(response("price", "Price is required"));
+  if(!stock_quantity)
+    return res.status(400).json(response("stock_quantity", "Stock quantity is required", item));
+
+  if (name.length < 3)
+    return res.status(400).json(response("name", "Name should be at least 3 characters long", item));
+  if (description.length < 3)
+    return res.status(400).json(response("description", "Description should be at least 3 characters long", item));
+  if (manufacturer.length < 3)
+    return res.status(400).json(response("manufacturer", "Manufacturer should be at least 3 characters long", item));
   next();
 };
 
 const update = async (req, res) => {
-  const { currentUser } = req;
-  if (!currentUser.can_edit_category()) return res.status(401).json(response("error", "You do not have permission to edit this category."));
-
   try {
-    let { name, title, description, remove } = req.body;
-    const { category, images } = req;
+    const { name, description, manufacturer, price, stock_quantity, remove } = req.body;
+    const { item, images } = req;
 
-    // Check if the category name is already taken
+    // Check if the item name is already taken
     const catName = await CarPart.findOne({ name });
-    if (catName && catName.name != category.name)
-      return res.status(400).json(response("name", "This name is already taken."));
+    if (catName && catName.name != item.name)
+      return res.status(400).json(response("name", "This name is already taken.", item));
 
     // Settling the uploaded images array
     let IMAGES = [];
@@ -226,48 +270,57 @@ const update = async (req, res) => {
         return {
           name: image,
           src: `/assets/Images/${image}`,
-          client: req.currentUser._id,
         };
       });
       IMAGES = await Image.insertMany(imagesArr);
       IMAGES = IMAGES.map((image) => image._id);
     }
 
-    const updated_category = await CarPart.findOne({ _id: category._id });
+    const updated_item = await CarPart.findOne({ _id: item._id });
     if (typeof remove != undefined) {
       if (typeof remove == "string") {
         const arr = remove.split(",");
+        if(item.gallery.length <= arr.length){
+          let flag = 0;
+          item.gallery.map(img => {
+            arr.map(id => {
+              if(img._id == id){
+                flag = flag + 1;
+              }
+            })
+          })
+          if(flag == item.gallery.length)
+            return res.status(400).json(response('file','You can\'t delete all the images of this item, one required', item))
+        }
         arr.forEach((imageId) => {
-          updated_category.gallery = updated_category.gallery.filter((image) => image != imageId);
+          updated_item.gallery = updated_item.gallery.filter((image) => image != imageId);
         });
       }
     }
 
-    // Updating the category with the new data
-    updated_category.name = name;
-    updated_category.title = title;
-    updated_category.description = description;
-    updated_category.gallery = [...updated_category.gallery, ...IMAGES];
+    // Updating the item with the new data
+    updated_item.name = name;
+    updated_item.manufacturer = manufacturer;
+    updated_item.description = description;
+    updated_item.price = price;
+    updated_item.stock_quantity = stock_quantity;
+    updated_item.gallery = [...updated_item.gallery, ...IMAGES];
 
-    await updated_category.populate("gallery");
-    await updated_category;
-    await updated_category.save();
-    res.status(200).json(response("success", "CarPart updated successfully.", updated_category));
+    await updated_item.populate("gallery");
+    await updated_item;
+    await updated_item.save();
+    res.status(200).json(response("success", "CarPart updated successfully.", updated_item));
   } catch (error) {
     // This is returned when something goes wrong
-    res.status(500).json(response("error", `Something went wrong while updating the category. ${error.message}`));
+    res.status(500).json(response("error", `Something went wrong while updating the car part. ${error.message}`));
   }
 };
 
-// delete category
+// delete item
 const remove = async (req, res) => {
-  const { currentUser } = req;
-  if (!currentUser.can_delete_category())
-    return res.status(401).json(response("error", "You don't have permission to delete this category."));
-
   try {
-    const { category } = req;
-    await CarPart.deleteOne({ _id: category._id });
+    const { item } = req;
+    await CarPart.deleteOne({ _id: item._id });
     res.status(200).json(response("success", "CarPart is deleted!"));
   } catch (error) {
     res
@@ -275,7 +328,7 @@ const remove = async (req, res) => {
       .json(
         response(
           "error",
-          "Something went wrong while deleting the category. " + error.message
+          "Something went wrong while deleting the car Part. " + error.message
         )
       );
   }
@@ -283,10 +336,6 @@ const remove = async (req, res) => {
 
 // delete multiple categories
 const deleteMultiple = async (req, res) => {
-  const { currentUser } = req;
-  if (!currentUser.can_delete_category())
-    return res.status(401).json(response("error", "You don't have permission to delete categories."));
-
   try {
     const { ids } = req.body;
     await CarPart.deleteMany({ _id: { $in: ids } });
@@ -295,7 +344,7 @@ const deleteMultiple = async (req, res) => {
       .json(
         response(
           "success",
-          "Categories deleted successfully!"
+          "Car Parts deleted successfully!"
         )
       );
   } catch (error) {
@@ -304,47 +353,19 @@ const deleteMultiple = async (req, res) => {
       .json(
         response(
           "error",
-          "Something went wrong while deleting categories. " + error.message
+          "Something went wrong while deleting Car Parts. " + error.message
         )
       );
   }
 };
 
-// change state
-const changeState = async (req, res) => {
-  const { currentUser } = req;
-  if (!currentUser.can_edit_category())
-    return res.status(401).json(response("error", "You don't have permission to change the state of this category."));
 
-  try {
-    const { state } = req.body;
-    const { category } = req;
-    category.enabled = state;
-    await category.save();
-    res
-      .status(200)
-      .json(
-        response(
-          "success",
-          `${state ? "CarPart enabled" : "CarPart disabled"} successfully!`,
-          category
-        )
-      );
-  } catch (error) {
-    res
-      .status(500)
-      .json(
-        response(
-          "error",
-          "Something went wrong while changing the state of the category. " + error.message
-        )
-      );
-  }
-};
 
 export {
   itemById,
   list,
+  outOfStock,
+  stockLessThan20,
   item,
   upload,
   verifyInputs,
@@ -353,5 +374,4 @@ export {
   update,
   remove,
   deleteMultiple,
-  changeState,
 };

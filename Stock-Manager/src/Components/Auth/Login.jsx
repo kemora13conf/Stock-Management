@@ -41,11 +41,10 @@ export default function Login() {
   }, []);
   return (
     <motion.div
-      initial={{ opacity: 0.4, y: -50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0.4, y: -50 }}
+      initial={{ opacity: 1, x: 0}}
+      transition={{duration: .5}}
+      exit={{ opacity: 0.4, x: 100 }}
       key={"login"}
-      transition={{ duration: 0.3 }}
       className="
         relative 
         flex flex-col justify-center items-center

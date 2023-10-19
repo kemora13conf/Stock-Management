@@ -76,7 +76,11 @@ function Header() {
               text-light-quarternary-500 dark:text-dark-quarternary-500
             "
           >
-            Stock Manager
+            {
+              bounds.width<450
+              ? 'SM'
+              : 'Stock Manager'
+            }
           </h1>
         </div>
         <div className="flex items-center gap-3">

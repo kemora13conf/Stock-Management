@@ -46,7 +46,7 @@ function Parts() {
   const formRef = useRef();
 
   useEffect(() => {
-    setActiveTab('parts');
+    setActiveTab('Parts');
     setLoaded(true);
   }, [reqFinished]);
 

@@ -173,11 +173,7 @@ function Table(props) {
                         <div className="line-clamp-1">{carPart.stock_quantity}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="w-fit h-auto flex gap-4 items-center px-4 py-2  rounded-lg">
-                          <Toggle
-                            toggled={carPart.enabled}
-                            onClick={(state) => changeState(state, carPart._id)}
-                          />
+                        <div className="w-fit h-auto flex gap-4 items-center rounded-lg">
                           <button
                             onClick={() => { editItem(carPart._id) }}
                             className="
