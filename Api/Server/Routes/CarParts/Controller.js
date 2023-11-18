@@ -3,6 +3,8 @@ import multer, { diskStorage } from "multer";
 import path from "path";
 import Image from "../../Models/Image.js";
 import CarPart from "../../Models/CarPart.js";
+import Notification from "../../Models/Notification.js";
+import { io } from "../../index.js";
 
 const itemById = async (req, res, next, id) => {
   try {
@@ -84,42 +86,6 @@ const list = async (req, res) => {
   }
 };
 
-const outOfStock = async (req, res) => {
-  try {
-    const carParts = await CarPart.find({ stock_quantity: 0 })
-      .populate('gallery')
-    res.status(200).json(
-      response("success", "Data fetched successfully", carParts)
-    );
-  } catch (error) {
-    res
-      .status(500)
-      .json(
-        response(
-          "error",
-          "Something went wrong while fetching data. " + error.message
-        )
-      );
-  }
-};
-const stockLessThan20 = async (req, res) => {
-  try {
-    const carParts = await CarPart.find({ stock_quantity: { $lt: 20 } })
-      .populate('gallery')
-    res.status(200).json(
-      response("success", "Data fetched successfully", carParts)
-    );
-  } catch (error) {
-    res
-      .status(500)
-      .json(
-        response(
-          "error",
-          "Something went wrong while fetching data. " + error.message
-        )
-      );
-  }
-};
 
 const item = (req, res) => {
   return res
@@ -209,6 +175,19 @@ const create = async (req, res) => {
       stock_quantity,
       gallery: IMAGES,
     });
+    if (item.stock_quantity == 0){
+      const notification = await Notification.create({
+        title: "Warning",
+        message: `The ${item.name} is out of stock`,
+      })
+      io.emit('notification', notification)
+    } else if (item.stock_quantity < 10){
+      const notification = await Notification.create({
+        title: "Informe",
+        message: `The stock quantity of ${item.name} is ${item.stock_quantity}`,
+      })
+      io.emit('notification', notification)
+    }
     res
       .status(200)
       .json(
@@ -309,6 +288,21 @@ const update = async (req, res) => {
     await updated_item.populate("gallery");
     await updated_item;
     await updated_item.save();
+
+    if (updated_item.stock_quantity == 0){
+      const notification = await Notification.create({
+        title: "Warning",
+        message: `The ${updated_item.name} is out of stock`,
+      })
+      io.emit('notification', notification)
+    } else if (updated_item.stock_quantity < 10){
+      const notification = await Notification.create({
+        title: "Informe",
+        message: `The stock quantity of ${updated_item.name} is ${updated_item.stock_quantity}`,
+      })
+      io.emit('notification', notification)
+    }
+
     res.status(200).json(response("success", "CarPart updated successfully.", updated_item));
   } catch (error) {
     // This is returned when something goes wrong
@@ -364,8 +358,6 @@ const deleteMultiple = async (req, res) => {
 export {
   itemById,
   list,
-  outOfStock,
-  stockLessThan20,
   item,
   upload,
   verifyInputs,
