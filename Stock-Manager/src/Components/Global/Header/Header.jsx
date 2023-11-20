@@ -6,6 +6,7 @@ import "./header.css";
 import { AnimatePresence, motion } from "framer-motion";
 import Fetch from "../../utils";
 import { toast } from "react-toastify";
+import Notifcations from "./Notifcations/Notifcations";
 
 function Header() {
   const { currentUser, loaded, theme, setTheme } = useContext(AppContext);
@@ -84,6 +85,7 @@ function Header() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
+          <Notifcations />
           <div
             onClick={toggleTheme}
             className={`

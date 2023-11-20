@@ -56,5 +56,17 @@ router.put("/read", signinRequired, async (req, res) => {
     res.status(500).json(response("error", error.message));
   }
 });
+router.delete("/all", signinRequired, async (req, res) => {
+  try {
+    const notifications = await Notification.deleteMany({});
+    res.status(200).json(
+      response("success", "Data fetched successfully", {
+        notifications,
+      })
+    );
+  } catch (error) {
+    res.status(500).json(response("error", error.message));
+  }
+});
 
 export default router;

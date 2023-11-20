@@ -20,14 +20,18 @@ import Parts from "./Components/Parts/Parts";
 import "./ScrollBarStyles/scrollbar.css";
 import Fetch from "./Components/utils";
 import ConfirmAlert from "./Components/Global/Popups/ConfirmAlert";
+import { io } from "socket.io-client";
 
+console.log(import.meta.env.VITE_SOCKET)
 const AppContext = createContext();
-const AppProvider = ({ currentUser, setCurrentUser, children }) => {
+const AppProvider = ({ currentUser, setCurrentUser, socket, children }) => {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [isAuth, setIsAuth] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [reqFinished, setReqFinished] = useState(false);
   const [theme, setTheme] = useState("light");
+
+  
 
   // state for the confirm popup
   const [confirm, setConfirm] = useState(undefined);
@@ -48,6 +52,7 @@ const AppProvider = ({ currentUser, setCurrentUser, children }) => {
     setTheme,
     confirm,
     setConfirm,
+    socket: socket,
   };
 
   async function checkAuth() {
@@ -119,8 +124,14 @@ const AppProvider = ({ currentUser, setCurrentUser, children }) => {
 
 function App() {
   const [currentUser, setCurrentUser] = useState(undefined);
+  const socket = io(import.meta.env.VITE_SOCKET);
+    
+  socket.on("connect", () => {
+    console.log("connected");
+  });
+
   return (
-    <AppProvider {...{ currentUser, setCurrentUser }}>
+    <AppProvider {...{ currentUser, setCurrentUser, socket }}>
       <BrowserRouter>
         <AnimatePresence mode="wait">
           <ToastContainer />

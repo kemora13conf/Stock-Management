@@ -82,20 +82,7 @@ app.use('/assets', express.static(path.join(__dirname, './../Public/')));
 app.use('/assets', express.static(path.join(__dirname, './../dist/assets')));
 
 // Logging the requests
-app.use((req, res, next) => {
-  console.log(
-    "Coming : [ " +
-      req.method +
-      " Request ] " +
-      res.statusCode +
-      " " +
-      req.url +
-      " [ " +
-      new Date().toDateString() +
-      " ]"
-  );
-  next();
-});
+app.use(logger);
 
 
 // Importing the routes
@@ -103,7 +90,7 @@ import UsersRouter from './Routes/Users/index.js'
 import authRouter from './Routes/Auth/index.js'
 import carParts from './Routes/CarParts/index.js'
 import Notifications from './Routes/Notifications/index.js'
-import { initAdmin, response } from './utils.js';
+import { initAdmin, logger, response } from './utils.js';
 
 // Using the routes
 app.use(initAdmin)
