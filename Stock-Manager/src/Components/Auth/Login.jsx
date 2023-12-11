@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AppContext } from "../../App";
 import Fetch from "../utils";
+import "./background.css";
 
 export default function Login() {
   const { setIsAuth, setCurrentUser, setLoaded, setTheme, theme } =
